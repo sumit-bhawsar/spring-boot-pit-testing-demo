@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.0'
 	id 'io.spring.dependency-management' version '1.1.5'
+	id 'info.solidsoft.pitest' version '1.15.0'
 }
 
 group = 'com.sb'
@@ -17,6 +18,20 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+
+	// https://mvnrepository.com/artifact/com.h2database/h2
+	implementation group: 'com.h2database', name: 'h2', version: '2.2.224'
+
+
+	compileOnly 'org.projectlombok:lombok:1.18.32'
+	annotationProcessor 'org.projectlombok:lombok:1.18.32'
+
+	testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+	testCompileOnly 'org.projectlombok:lombok:1.18.32'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -24,3 +39,35 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+def integrationTestTask = tasks.register('integrationTest', Test) {
+	description = 'Runs integration tests.'
+	group = 'verification'
+	useJUnitPlatform()
+
+	sourceSets =
+	testClassesDirs = integrationTest.output.classesDirs
+	classpath = configurations[integrationTest.runtimeClasspathConfigurationName] + integrationTest.output
+
+	shouldRunAfter(tasks.named('test'))
+}
+
+sourceSets {
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integrationTest/java')
+		}
+		resources.srcDir file('src/integrationTest/resources')
+	}
+}
+
+pitest {
+	targetClasses = ['com.sb.spring_boot_pit_testing_demo.*']  //by default "${project.group}.*"
+	pitestVersion = '1.15.0' //not needed when a default PIT version should be used
+	threads = 4
+	outputFormats = ['XML', 'HTML']
+	timestampedReports = false
+}
+build.dependsOn 'pitest'
