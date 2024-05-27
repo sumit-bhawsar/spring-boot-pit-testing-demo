@@ -18,20 +18,22 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long productId) {
+    @ResponseStatus(HttpStatus.OK)
+    public ProductDTO getProductById(@PathVariable Long productId) {
         ProductDTO productDTO = productService.getProductById(productId);
-        return ResponseEntity.ok(productDTO);
+        return productDTO;
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductDTO>> getAllProducts() {
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductDTO> getAllProducts() {
         List<ProductDTO> products = productService.getAllProducts();
-        return ResponseEntity.ok(products);
+        return products;
     }
 
     @PostMapping
-    public ResponseEntity<Void> saveProduct(@RequestBody ProductDTO productDTO) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void saveProduct(@RequestBody ProductDTO productDTO) {
         productService.saveProduct(productDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

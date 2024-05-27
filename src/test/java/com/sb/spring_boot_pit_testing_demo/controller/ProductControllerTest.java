@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductControllerTest {
@@ -25,12 +25,12 @@ public class ProductControllerTest {
     @Mock
     private ProductService productService;
 
-    @InjectMocks
     private ProductController productController;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        productController = new ProductController(productService);
     }
 
     @Test
@@ -39,10 +39,9 @@ public class ProductControllerTest {
         productDTO.setId(1L);
         when(productService.getProductById(1L)).thenReturn(productDTO);
 
-        ResponseEntity<ProductDTO> responseEntity = productController.getProductById(1L);
+        ProductDTO responseEntity = productController.getProductById(1L);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(1L, responseEntity.getBody().getId());
+        assertEquals(1L, responseEntity.getId());
     }
 
     @Test
@@ -56,12 +55,12 @@ public class ProductControllerTest {
         products.add(productDTO2);
         when(productService.getAllProducts()).thenReturn(products);
 
-        ResponseEntity<List<ProductDTO>> responseEntity = productController.getAllProducts();
+        List<ProductDTO> responseEntity = productController.getAllProducts();
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(2, responseEntity.getBody().size());
-        assertEquals(1L, responseEntity.getBody().get(0).getId());
-        assertEquals(2L, responseEntity.getBody().get(1).getId());
+
+        assertEquals(2, responseEntity.size());
+        assertEquals(1L, responseEntity.get(0).getId());
+        assertEquals(2L, responseEntity.get(1).getId());
     }
 
     @Test
@@ -71,8 +70,10 @@ public class ProductControllerTest {
         productDTO.setName("Test Product");
         productDTO.setPrice(BigDecimal.TEN);
 
-        ResponseEntity<Void> responseEntity = productController.saveProduct(productDTO);
+        doNothing().when(productService).saveProduct(any(ProductDTO.class));
 
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        productController.saveProduct(productDTO);
+
+        verify(productService, times(1)).saveProduct(any(ProductDTO.class));
     }
 }

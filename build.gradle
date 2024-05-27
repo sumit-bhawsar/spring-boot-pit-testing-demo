@@ -69,5 +69,6 @@ pitest {
 	threads = 4
 	outputFormats = ['XML', 'HTML']
 	timestampedReports = false
+	junit5PluginVersion = '1.2.1'
 }
 build.dependsOn 'pitest'

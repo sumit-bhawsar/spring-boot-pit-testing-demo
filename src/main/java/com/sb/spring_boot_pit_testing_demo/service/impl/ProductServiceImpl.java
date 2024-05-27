@@ -27,14 +27,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO getProductById(Long productId) {
-        if(productId<=1){
+        if(productId<=0){
             throw new InvalidValueException("id");
         }
         Optional<Product> product = productRepository.findById(productId);
         if(!product.isPresent()){
             throw new NotFoundException(productId.toString());
         }
-        return new ProductDTO();
+        return new ProductDTO(product.get());
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void saveProduct(ProductDTO productDTO) {
-        if(productDTO.getId() <=0){
+        if(productDTO.getId() <= 0L){
             throw new InvalidValueException("id");
         }
         if(!hasText(productDTO.getName()) || !productName.matcher(productDTO.getName()).matches()){

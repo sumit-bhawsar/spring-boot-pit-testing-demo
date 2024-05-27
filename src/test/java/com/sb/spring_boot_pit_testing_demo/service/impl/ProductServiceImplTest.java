@@ -28,12 +28,12 @@ public class ProductServiceImplTest extends Assertions {
     @Mock
     private ProductRepository productRepository;
 
-    @InjectMocks
     private ProductServiceImpl productService;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        productService = new ProductServiceImpl(productRepository);
     }
 
     @Test
@@ -93,6 +93,14 @@ public class ProductServiceImplTest extends Assertions {
     }
 
     @Test
+    public void testSaveProduct_InvalidId_minus1() {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(-1L);
+
+        assertThrows(InvalidValueException.class, () -> productService.saveProduct(productDTO));
+    }
+
+    @Test
     public void testSaveProduct_InvalidName() {
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(1L);
@@ -125,7 +133,7 @@ public class ProductServiceImplTest extends Assertions {
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(1L);
         productDTO.setName("Test Product");
-        productDTO.setPrice(BigDecimal.TEN);
+        productDTO.setPrice(BigDecimal.ONE);
 
         productService.saveProduct(productDTO);
 
