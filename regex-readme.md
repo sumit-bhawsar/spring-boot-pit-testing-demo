@@ -1415,6 +1415,137 @@ public class URLRegexExample {
 
 This example demonstrates how to construct a regex pattern for matching HTTP URLs and how to use it in a Java program to extract different components of a URL.
 
+To use the regex for HTTP URL validation in a Spring application with JSR 303 (Bean Validation), you can define a custom validation annotation and validator. Here’s a step-by-step guide:
+
+### Step 1: Create a Custom Annotation
+
+Define a custom annotation that uses the regex for validating HTTP URLs.
+
+```java
+package com.example.validation;
+
+import javax.validation.Constraint;
+import javax.validation.Payload;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Constraint(validatedBy = UrlValidator.class)
+@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ValidUrl {
+    String message() default "Invalid URL";
+    Class<?>[] groups() default {};
+    Class<? extends Payload>[] payload() default {};
+}
+```
+
+### Step 2: Create the Validator
+
+Implement the validator logic using the regex pattern.
+
+```java
+package com.example.validation;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import java.util.regex.Pattern;
+
+public class UrlValidator implements ConstraintValidator<ValidUrl, String> {
+    private static final String URL_PATTERN = "http[s]?://([a-zA-Z0-9.-]+)(:[0-9]+)?(/[^?#]*)?(\\?[^#]*)?(#.*)?";
+    private static final Pattern pattern = Pattern.compile(URL_PATTERN);
+
+    @Override
+    public void initialize(ValidUrl constraintAnnotation) {
+        // No initialization needed
+    }
+
+    @Override
+    public boolean isValid(String url, ConstraintValidatorContext context) {
+        if (url == null || url.isEmpty()) {
+            return true; // Use @NotNull for null checks
+        }
+        return pattern.matcher(url).matches();
+    }
+}
+```
+
+### Step 3: Use the Annotation in a Model
+
+Apply the custom annotation to a field in your model class.
+
+```java
+package com.example.model;
+
+import com.example.validation.ValidUrl;
+
+import javax.validation.constraints.NotNull;
+
+public class Website {
+    
+    @NotNull
+    @ValidUrl
+    private String url;
+
+    // Getters and Setters
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+}
+```
+
+### Step 4: Create a Controller to Test Validation
+
+Create a Spring controller to handle requests and test the validation.
+
+```java
+package com.example.controller;
+
+import com.example.model.Website;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
+@RestController
+@RequestMapping("/api/websites")
+@Validated
+public class WebsiteController {
+
+    @PostMapping
+    public ResponseEntity<String> addWebsite(@RequestBody @Valid Website website) {
+        return new ResponseEntity<>("URL is valid!", HttpStatus.OK);
+    }
+}
+```
+
+### Step 5: Test the Validation
+
+To test the validation, you can use a tool like `curl`, Postman, or any HTTP client to send a POST request to your Spring application.
+
+#### Example using `curl`:
+
+```sh
+curl -X POST -H "Content-Type: application/json" -d '{"url":"http://example.com"}' http://localhost:8080/api/websites
+```
+
+### Summary
+
+Here's a quick recap of the steps:
+1. **Create a Custom Annotation** (`@ValidUrl`).
+2. **Implement the Validator** (`UrlValidator`).
+3. **Use the Annotation** in your model class (`Website`).
+4. **Create a Controller** to handle and validate the request.
+
+With this setup, your Spring application can now validate HTTP URLs using JSR 303 validation with a custom annotation and validator.
+
 #### Conclusion
 
 Backtracking is an essential feature of regex engines that enables powerful pattern matching capabilities. However, it can also cause performance issues if not managed correctly. By understanding how backtracking works and following best practices, such as avoiding nested quantifiers and using atomic groups or possessive quantifiers, you can create efficient and reliable regex patterns in Java. Start applying these techniques to optimize your regex usage and avoid the pitfalls of excessive backtracking.
