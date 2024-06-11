@@ -1282,6 +1282,138 @@ Using group indices for replacements in Java regex can significantly simplify te
 ### Conclusion:
 
 Non-greedy quantifiers and atomic groups are advanced features in Java regex that provide finer control over pattern matching and can help improve performance, especially in scenarios where backtracking needs to be minimized. By incorporating these features into your regex patterns, you can make your text processing tasks more efficient and robust. Experiment with these concepts in your Java projects to see how they can enhance your regex skills and improve your code's performance.
+Certainly! Building a regex for matching HTTP URLs involves understanding the structure of a URL and translating that structure into a regular expression pattern. Here’s a step-by-step guide from a developer's perspective:
+
+### Step 1: Understand the URL Structure
+
+A typical HTTP URL has the following components:
+1. **Scheme:** `http://` or `https://`
+2. **Host:** A domain name or IP address
+3. **Port:** An optional port number, prefixed by a colon (`:`)
+4. **Path:** The path to a resource, which starts with a slash (`/`)
+5. **Query:** An optional query string, prefixed by a question mark (`?`)
+6. **Fragment:** An optional fragment identifier, prefixed by a hash (`#`)
+
+### Step 2: Start with the Scheme
+
+Begin with matching the scheme (`http` or `https`):
+
+```regex
+http[s]?
+```
+
+- `http`: Matches the literal string "http".
+- `[s]?`: Optionally matches "s", making the pattern match both "http" and "https".
+
+### Step 3: Match the Host
+
+The host can be a domain name or an IP address. For simplicity, let's match typical domain names:
+
+```regex
+http[s]?://([a-zA-Z0-9.-]+)
+```
+
+- `://`: Matches the literal "://".
+- `([a-zA-Z0-9.-]+)`: Matches the domain name part, which can include letters, digits, dots, and hyphens.
+
+### Step 4: Add Optional Port
+
+The port number is optional and is prefixed by a colon:
+
+```regex
+http[s]?://([a-zA-Z0-9.-]+)(:[0-9]+)?
+```
+
+- `(:[0-9]+)?`: Optionally matches a colon followed by one or more digits.
+
+### Step 5: Match the Path
+
+The path starts with a slash and may include various characters:
+
+```regex
+http[s]?://([a-zA-Z0-9.-]+)(:[0-9]+)?(/[^?#]*)?
+```
+
+- `(/[^?#]*)?`: Optionally matches a slash followed by any characters except "?" and "#".
+
+### Step 6: Add Optional Query
+
+The query string starts with a question mark and includes key-value pairs:
+
+```regex
+http[s]?://([a-zA-Z0-9.-]+)(:[0-9]+)?(/[^?#]*)?(\\?[^#]*)?
+```
+
+- `(\\?[^#]*)?`: Optionally matches a question mark followed by any characters except "#".
+
+### Step 7: Add Optional Fragment
+
+The fragment starts with a hash and includes various characters:
+
+```regex
+http[s]?://([a-zA-Z0-9.-]+)(:[0-9]+)?(/[^?#]*)?(\\?[^#]*)?(#.*)?
+```
+
+- `(#.*)?`: Optionally matches a hash followed by any characters.
+
+### Final Regex Pattern
+
+Combining all these components, we get the final regex pattern for matching HTTP URLs:
+
+```regex
+http[s]?://([a-zA-Z0-9.-]+)(:[0-9]+)?(/[^?#]*)?(\\?[^#]*)?(#.*)?
+```
+
+### Example in Java
+
+Here’s how you can use this regex pattern in a Java program:
+
+```java
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class URLRegexExample {
+    public static void main(String[] args) {
+        String regex = "http[s]?://([a-zA-Z0-9.-]+)(:[0-9]+)?(/[^?#]*)?(\\?[^#]*)?(#.*)?";
+        String input = "http://example.com:80/path/to/resource?name=value#fragment";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.matches()) {
+            System.out.println("Matched URL:");
+            System.out.println("Full URL: " + matcher.group(0));
+            System.out.println("Host: " + matcher.group(1));
+            System.out.println("Port: " + (matcher.group(2) != null ? matcher.group(2) : "none"));
+            System.out.println("Path: " + (matcher.group(3) != null ? matcher.group(3) : "none"));
+            System.out.println("Query: " + (matcher.group(4) != null ? matcher.group(4) : "none"));
+            System.out.println("Fragment: " + (matcher.group(5) != null ? matcher.group(5) : "none"));
+        } else {
+            System.out.println("The input does not match the URL pattern.");
+        }
+    }
+}
+```
+
+### Explanation of Java Code
+
+1. **Pattern Compilation:**
+   - The regex pattern is compiled using `Pattern.compile(regex)`.
+
+2. **Matching:**
+   - A `Matcher` object is created to match the input string against the pattern.
+   - The `matcher.matches()` method checks if the entire input string matches the pattern.
+
+3. **Extracting Components:**
+   - The `matcher.group()` method is used to extract various components of the matched URL.
+   - `matcher.group(0)` gives the entire matched URL.
+   - `matcher.group(1)` gives the host part.
+   - `matcher.group(2)` gives the port part, if present.
+   - `matcher.group(3)` gives the path part, if present.
+   - `matcher.group(4)` gives the query string, if present.
+   - `matcher.group(5)` gives the fragment, if present.
+
+This example demonstrates how to construct a regex pattern for matching HTTP URLs and how to use it in a Java program to extract different components of a URL.
 
 #### Conclusion
 
